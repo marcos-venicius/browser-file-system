@@ -1,43 +1,39 @@
-import { FilePlus, FolderPlus } from 'lucide-react'
+import { FolderPlus } from 'lucide-react'
 import { useFileSystem } from './hooks/use-file-system'
 import { CurrentPath } from './components/current-path'
 import { Ls } from './components/ls'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem
-} from '~/components/ui/dropdown-menu'
+import { useRef } from 'react'
+import { CreateFolderDialog } from './components/create-folder-dialog'
+import { Button } from './components/ui/button'
 
 export function App() {
   const fs = useFileSystem()
 
+  const createFolderDialog = useRef<CreateFolderDialog>(null)
+
+  function openCreateFolderDialog() {
+    if (createFolderDialog.current) {
+      createFolderDialog.current.open()
+    }
+  }
+
   return (
-    <main className='w-full mx-auto max-w-6xl'>
-      <header className='w-full p-5 flex items-center justify-between gap-5 border-b'>
-        <CurrentPath fs={fs} />
+    <>
+      <CreateFolderDialog ref={createFolderDialog} fs={fs} />
 
-        <div className='flex items-center gap-3'>
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <FolderPlus className='text-zinc-600' />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              <DropdownMenuItem
-                className='flex gap-3 items-center'
-                onClick={fs.mkdir.bind(null, 'any')}>
-                <FolderPlus size={15} className='text-zinc-600' /> new folder
-              </DropdownMenuItem>
+      <main className='w-full mx-auto max-w-6xl'>
+        <header className='w-full p-5 flex items-center justify-between gap-5 border-b'>
+          <CurrentPath fs={fs} />
 
-              <DropdownMenuItem className='flex gap-3 items-center'>
-                <FilePlus size={15} className='text-zinc-600' /> new file
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
+          <div className='flex items-center gap-3'>
+            <Button size='sm' className='p-2' variant='ghost' onClick={openCreateFolderDialog}>
+              <FolderPlus className='text-zinc-600' size={22} />
+            </Button>
+          </div>
+        </header>
 
-      <Ls fs={fs} />
-    </main>
+        <Ls fs={fs} />
+      </main>
+    </>
   )
 }
