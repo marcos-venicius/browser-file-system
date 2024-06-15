@@ -20,48 +20,76 @@ export type PathLocation = {
   name: string
 }
 
-export class File {
+export type ItemInfo<T extends Kind = Kind.File | Kind.Dir> = {
+  name: string
+  createdAt: Date
+  updatedAt: Date
+  location: Array<string>
+  kind: T
+}
+
+abstract class Item<T extends Kind> {
   public readonly name: string
-  public readonly content: string
   public readonly updatedAt: Date
   public readonly createdAt: Date
+  public readonly location: Array<string>
+  private readonly kind: T
 
-  constructor(name: string, content: string) {
+  constructor(name: string, kind: T, location: Array<string>) {
     const date = new Date()
 
     this.name = name
-    this.content = content
-    this.updatedAt = date
+    this.kind = kind
+    this.location = location
     this.createdAt = date
+    this.updatedAt = date
   }
 
-  public static create(name: string, content = ''): FileSystem<Kind.File> {
+  public info(): ItemInfo<T> {
     return {
-      o: new File(name, content),
+      name: this.name,
+      createdAt: this.createdAt,
+      location: this.location,
+      updatedAt: this.updatedAt,
+      kind: this.kind
+    }
+  }
+}
+
+export class File extends Item<Kind.File> {
+  public readonly content: string
+
+  constructor(name: string, location: Array<string>, content = '') {
+    super(name, Kind.File, location)
+
+    this.content = content
+  }
+
+  public static create(name: string, location: Array<string>, content = ''): FileSystem<Kind.File> {
+    return {
+      o: new File(name, location, content),
       kind: Kind.File
     }
   }
 }
 
-export class Directory {
-  public readonly name: string
+export class Directory extends Item<Kind.Dir> {
   public readonly children: Array<FileSystem>
-  public readonly updatedAt: Date
-  public readonly createdAt: Date
 
-  constructor(name: string, children: Array<FileSystem> = []) {
-    const date = new Date()
+  constructor(name: string, location: Array<string>, children: Array<FileSystem> = []) {
+    super(name, Kind.Dir, location)
 
-    this.name = name
     this.children = children
-    this.updatedAt = date
-    this.createdAt = date
   }
 
-  public static create(name: string, children: Array<FileSystem> = []): FileSystem<Kind.Dir> {
+  public static create(
+    name: string,
+    location: Array<string>,
+    children: Array<FileSystem> = []
+  ): FileSystem<Kind.Dir> {
     return {
       kind: Kind.Dir,
-      o: new Directory(name, children)
+      o: new Directory(name, location, children)
     }
   }
 }

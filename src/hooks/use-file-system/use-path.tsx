@@ -1,59 +1,65 @@
 import { useState } from 'react'
 import { Directory, FileSystem, Kind, PathLocation } from './types'
 
-function validatePath(path: Array<string>, fs: FileSystem, alternativePath: Array<string> = []) {
-  function check(array = [fs], index = 0) {
-    if (index === path.length) return true
+function validatePath(path: Array<string>, fs: FileSystem) {
+  const pathLocation: Array<PathLocation> = []
 
+  function find(array = [fs], index = 0) {
     for (const item of array) {
       if (item.kind === Kind.Dir && item.o.name === path[index]) {
-        return check((item.o as Directory).children, index + 1)
+        pathLocation.push({
+          name: item.o.name,
+          location: item.o.location
+        })
+
+        if (index === path.length - 1) return true
+
+        return find((item.o as Directory).children, index + 1)
       }
     }
 
     return false
   }
 
-  const pathIsValid = check()
-  const pathToReturn = pathIsValid ? path : alternativePath
-  const pathDescription: Array<PathLocation> = []
+  const found = find()
 
-  for (let i = 0; i < pathToReturn.length; i++) {
-    if (i === 0) {
-      pathDescription.push({
-        name: pathToReturn[i],
-        location: [pathToReturn[i]]
-      })
-    } else {
-      pathDescription.push({
-        name: pathToReturn[i],
-        location: [...pathDescription[i - 1].location, pathToReturn[i]]
-      })
-    }
-  }
+  if (found) return pathLocation
 
-  return pathDescription
+  return []
 }
 
 export function usePath(initialPath: Array<string> = [], fs: FileSystem) {
-  const [path, setPath] = useState(validatePath(initialPath, fs, []))
+  const [path, setPath] = useState(validatePath(initialPath, fs))
 
   function pwd() {
     return path
   }
 
   function cd(location: Array<string>) {
-    setPath(currentPath =>
-      validatePath(
-        location,
-        fs,
-        currentPath.map(x => x.name)
-      )
-    )
+    setPath(validatePath(location, fs))
+  }
+
+  function _getCurrentNode() {
+    function find(array = [fs], index = 0) {
+      if (index > path.length - 1) return null
+
+      for (const item of array) {
+        if (item.kind === Kind.Dir && item.o.name === path[index].name) {
+          if (index === path.length - 1) return item.o as Directory
+
+          return find((item.o as Directory).children, index + 1)
+        }
+      }
+
+      return null
+    }
+
+    return find()
   }
 
   return {
     pwd,
-    cd
+    cd,
+    _getCurrentNode
   }
 }
