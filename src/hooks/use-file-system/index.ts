@@ -21,10 +21,12 @@ export function useFileSystem(): UseFileSystem {
   const path = usePath(['/', 'home', 'job', 'projects'], fileSystem)
 
   return {
-    pwd: path.pwd
+    pwd: path.pwd,
+    cd: path.cd
   }
 }
 
 export type UseFileSystem = {
   pwd(): Array<PathLocation>
+  cd(location: Array<string>): void
 }

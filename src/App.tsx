@@ -12,7 +12,7 @@ function CurrentPath({ fs }: Props) {
   const pwd = fs.pwd();
 
   function changePath(location: Array<string>) {
-    console.log(location);
+    fs.cd(location)
   }
 
   const fullPath = pwd.map(path => (

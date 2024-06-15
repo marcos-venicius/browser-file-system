@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Directory, FileSystem, PathLocation } from "./types";
 
-function validatePath(path: Array<string>, fs: FileSystem.FileSystem) {
+function validatePath(path: Array<string>, fs: FileSystem.FileSystem, alternativePath: Array<string> = []) {
   function check(array = [fs], index = 0) {
     if (index === path.length) return true;
 
@@ -14,37 +14,40 @@ function validatePath(path: Array<string>, fs: FileSystem.FileSystem) {
     return false;
   }
 
-  if (check()) {
-    const pathDescription: Array<PathLocation> = []
+  const pathIsValid = check();
+  const pathToReturn = pathIsValid ? path : alternativePath
+  const pathDescription: Array<PathLocation> = []
 
-    for (let i = 0; i < path.length; i++) {
-      if (i === 0) {
-        pathDescription.push({
-          name: path[i],
-          location: [path[i]]
-        })
-      } else {
-        pathDescription.push({
-          name: path[i],
-          location: [...pathDescription[i - 1].location, path[i]]
-        })
-      }
+  for (let i = 0; i < pathToReturn.length; i++) {
+    if (i === 0) {
+      pathDescription.push({
+        name: pathToReturn[i],
+        location: [pathToReturn[i]]
+      })
+    } else {
+      pathDescription.push({
+        name: pathToReturn[i],
+        location: [...pathDescription[i - 1].location, pathToReturn[i]]
+      })
     }
-
-    return pathDescription
   }
 
-  throw new Error('Invalid Path')
+  return pathDescription
 }
 
 export function usePath(initialPath: Array<string> = [], fs: FileSystem.FileSystem) {
-  const [path] = useState(validatePath(initialPath, fs))
+  const [path, setPath] = useState(validatePath(initialPath, fs, []))
 
   function pwd() {
     return path;
   }
 
+  function cd(location: Array<string>) {
+    setPath(currentPath => validatePath(location, fs, currentPath.map(x => x.name)))
+  }
+
   return {
     pwd,
+    cd
   }
 }
