@@ -44,6 +44,11 @@ export type ItemInfo<T extends Kind = Kind.File | Kind.Dir> = {
   kind: T
 }
 
+type AdditionalOptions = {
+  createdAt: Date
+  updatedAt: Date
+}
+
 abstract class Item<T extends Kind> {
   public readonly name: string
   public readonly updatedAt: Date
@@ -51,14 +56,25 @@ abstract class Item<T extends Kind> {
   public readonly location: Array<string>
   private readonly kind: T
 
-  constructor(name: string, kind: T, location: Array<string>) {
-    const date = new Date()
-
+  constructor(
+    name: string,
+    kind: T,
+    location: Array<string>,
+    additionalOptions?: AdditionalOptions
+  ) {
     this.name = name
     this.kind = kind
     this.location = location
-    this.createdAt = date
-    this.updatedAt = date
+
+    if (additionalOptions) {
+      this.createdAt = additionalOptions.createdAt
+      this.updatedAt = additionalOptions.updatedAt
+    } else {
+      const date = new Date()
+
+      this.createdAt = date
+      this.updatedAt = date
+    }
   }
 
   public info(): ItemInfo<T> {
@@ -75,15 +91,25 @@ abstract class Item<T extends Kind> {
 export class File extends Item<Kind.File> {
   public readonly content: string
 
-  constructor(name: string, location: Array<string>, content = '') {
-    super(name, Kind.File, location)
+  constructor(
+    name: string,
+    location: Array<string>,
+    content = '',
+    additionalOptions?: AdditionalOptions
+  ) {
+    super(name, Kind.File, location, additionalOptions)
 
     this.content = content
   }
 
-  public static create(name: string, location: Array<string>, content = ''): FileSystem<Kind.File> {
+  public static create(
+    name: string,
+    location: Array<string>,
+    content = '',
+    additionalOptions?: AdditionalOptions
+  ): FileSystem<Kind.File> {
     return {
-      o: new File(name, location, content),
+      o: new File(name, location, content, additionalOptions),
       kind: Kind.File
     }
   }
@@ -92,8 +118,13 @@ export class File extends Item<Kind.File> {
 export class Directory extends Item<Kind.Dir> {
   public readonly children: Array<FileSystem>
 
-  constructor(name: string, location: Array<string>, children: Array<FileSystem> = []) {
-    super(name, Kind.Dir, location)
+  constructor(
+    name: string,
+    location: Array<string>,
+    children: Array<FileSystem> = [],
+    additionalOptions?: AdditionalOptions
+  ) {
+    super(name, Kind.Dir, location, additionalOptions)
 
     this.children = children
   }
@@ -101,11 +132,12 @@ export class Directory extends Item<Kind.Dir> {
   public static create(
     name: string,
     location: Array<string>,
-    children: Array<FileSystem> = []
+    children: Array<FileSystem> = [],
+    additionalOptions?: AdditionalOptions
   ): FileSystem<Kind.Dir> {
     return {
       kind: Kind.Dir,
-      o: new Directory(name, location, children)
+      o: new Directory(name, location, children, additionalOptions)
     }
   }
 }

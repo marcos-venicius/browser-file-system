@@ -1,8 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { usePath } from './use-path'
 import {
   Directory,
-  File,
   FileSystem,
   ItemInfo,
   Kind,
@@ -11,31 +10,21 @@ import {
   formatKind
 } from '../../types'
 import { validFolderName } from '~/utils/valid-folder-name'
+import { Data } from './data'
+import { toast } from 'sonner'
+
+function useFileSystemLoader(): [FileSystem, React.Dispatch<React.SetStateAction<FileSystem>>] {
+  const [fileSystem, setFileSystem] = useState<FileSystem>(Directory.create('/', ['/']))
+
+  useEffect(() => {
+    Data.load().then(setFileSystem).finally(Data.emitLoaded)
+  }, [])
+
+  return [fileSystem, setFileSystem]
+}
 
 export function useFileSystem(): UseFileSystem {
-  const [fileSystem, setFileSystem] = useState<FileSystem>(
-    Directory.create(
-      '/',
-      ['/'],
-      [
-        Directory.create(
-          'home',
-          ['/', 'home'],
-          [
-            Directory.create(
-              'dev',
-              ['/', 'home', 'dev'],
-              [
-                File.create('app.tsx', ['/', 'home', 'dev', 'app.tsx']),
-                File.create('app.css', ['/', 'home', 'dev', 'app.css'])
-              ]
-            ),
-            Directory.create('job', ['/', 'home', 'job'])
-          ]
-        )
-      ]
-    )
-  )
+  const [fileSystem, setFileSystem] = useFileSystemLoader()
 
   const path = usePath(['/'], fileSystem)
 
@@ -97,6 +86,10 @@ export function useFileSystem(): UseFileSystem {
       message: ''
     }
   }
+
+  useEffect(() => {
+    Data.save(fileSystem).catch(() => toast.error('could not save the state'))
+  }, [fileSystem])
 
   return {
     pwd: path.pwd,
