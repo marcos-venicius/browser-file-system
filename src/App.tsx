@@ -1,8 +1,13 @@
-import { FolderPlus } from 'lucide-react'
-import { Button } from './components/ui/button'
+import { FilePlus, FolderPlus } from 'lucide-react'
 import { useFileSystem } from './hooks/use-file-system'
 import { CurrentPath } from './components/current-path'
 import { Ls } from './components/ls'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '~/components/ui/dropdown-menu'
 
 export function App() {
   const fs = useFileSystem()
@@ -13,9 +18,22 @@ export function App() {
         <CurrentPath fs={fs} />
 
         <div className='flex items-center gap-3'>
-          <Button variant='ghost'>
-            <FolderPlus className='text-zinc-600' />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <FolderPlus className='text-zinc-600' />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuItem
+                className='flex gap-3 items-center'
+                onClick={fs.mkdir.bind(null, 'any')}>
+                <FolderPlus size={15} className='text-zinc-600' /> new folder
+              </DropdownMenuItem>
+
+              <DropdownMenuItem className='flex gap-3 items-center'>
+                <FilePlus size={15} className='text-zinc-600' /> new file
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 

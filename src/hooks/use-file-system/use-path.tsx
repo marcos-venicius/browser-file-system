@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Directory, FileSystem, Kind, PathLocation } from './types'
+import { Directory, FileSystem, Kind, PathLocation } from '~/types'
 
 function validatePath(path: Array<string>, fs: FileSystem) {
   const pathLocation: Array<PathLocation> = []

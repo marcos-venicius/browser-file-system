@@ -11,6 +11,22 @@ export enum Kind {
   File = 'file'
 }
 
+export function formatKind(kind: Kind) {
+  switch (kind) {
+    case Kind.Dir:
+      return 'directory'
+    case Kind.File:
+      return 'file'
+    default:
+      return 'unkown'
+  }
+}
+
+export type SystemOutput = {
+  error: boolean
+  message: string
+}
+
 export type FileSystem<T extends Kind = Kind.Dir | Kind.File> = { kind: T } & (T extends Kind.File
   ? FileKind
   : DirKind)

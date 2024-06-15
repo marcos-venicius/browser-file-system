@@ -1,4 +1,4 @@
-import { ItemInfo, Kind } from '~/hooks/use-file-system/types'
+import { ItemInfo, Kind } from '~/types'
 import { FolderDisplay } from '~/components/folder-display'
 import { FileDisplay } from '~/components/file-display'
 import { UseFileSystem } from '~/hooks/use-file-system'
