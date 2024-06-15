@@ -23,7 +23,11 @@ interface IFormInputs {
 }
 
 const schema = z.object({
-  name: z.string().regex(settings.VALID_FOLDER_NAME_REGEX, 'invalid folder name')
+  name: z
+    .string()
+    .regex(settings.VALID_FOLDER_NAME_REGEX, 'invalid folder name')
+    .trim()
+    .min(1, 'invalid folder name')
 })
 
 export const CreateFolderDialog = React.forwardRef<CreateFolderDialog, Props>(
@@ -58,7 +62,9 @@ export const CreateFolderDialog = React.forwardRef<CreateFolderDialog, Props>(
       }
 
       setOpen(false)
-      form.reset()
+      form.reset({
+        name: ''
+      })
     }
 
     return (
