@@ -20,6 +20,9 @@ export function useFileSystem(): UseFileSystem {
 
   const path = usePath(['/', 'home', 'job', 'projects'], fileSystem)
 
+  function ls() {
+  }
+
   return {
     pwd: path.pwd,
     cd: path.cd

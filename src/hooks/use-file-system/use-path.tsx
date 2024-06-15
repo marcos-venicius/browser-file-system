@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { Directory, FileSystem, PathLocation } from "./types";
+import { useState } from 'react'
+import { Directory, FileSystem, Kind, PathLocation } from './types'
 
-function validatePath(path: Array<string>, fs: FileSystem.FileSystem, alternativePath: Array<string> = []) {
+function validatePath(path: Array<string>, fs: FileSystem, alternativePath: Array<string> = []) {
   function check(array = [fs], index = 0) {
-    if (index === path.length) return true;
+    if (index === path.length) return true
 
     for (const item of array) {
-      if (item.kind === FileSystem.Kind.Dir && item.o.name === path[index]) {
+      if (item.kind === Kind.Dir && item.o.name === path[index]) {
         return check((item.o as Directory).children, index + 1)
       }
     }
 
-    return false;
+    return false
   }
 
-  const pathIsValid = check();
+  const pathIsValid = check()
   const pathToReturn = pathIsValid ? path : alternativePath
   const pathDescription: Array<PathLocation> = []
 
@@ -35,15 +35,21 @@ function validatePath(path: Array<string>, fs: FileSystem.FileSystem, alternativ
   return pathDescription
 }
 
-export function usePath(initialPath: Array<string> = [], fs: FileSystem.FileSystem) {
+export function usePath(initialPath: Array<string> = [], fs: FileSystem) {
   const [path, setPath] = useState(validatePath(initialPath, fs, []))
 
   function pwd() {
-    return path;
+    return path
   }
 
   function cd(location: Array<string>) {
-    setPath(currentPath => validatePath(location, fs, currentPath.map(x => x.name)))
+    setPath(currentPath =>
+      validatePath(
+        location,
+        fs,
+        currentPath.map(x => x.name)
+      )
+    )
   }
 
   return {
