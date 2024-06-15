@@ -17,7 +17,7 @@ export function Ls({ fs }: Props) {
       <thead>
         <tr className='px-2 block'>
           <th className='w-10'></th>
-          <th className='text-sm text-zinc-600 w-40 px-5' align='left'>
+          <th className='text-sm text-zinc-600 w-52 px-5' align='left'>
             name
           </th>
           <th className='text-sm text-zinc-600 w-52 px-5' align='left'>

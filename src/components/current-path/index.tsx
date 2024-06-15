@@ -33,7 +33,7 @@ export function CurrentPath({ fs }: Props) {
   const Path = () => React.Children.toArray(fullPathAsElements)
 
   return (
-    <div className='flex items-center'>
+    <div className='flex items-center flex-wrap'>
       <Path />
     </div>
   )

@@ -17,15 +17,11 @@ export function FileDisplay({ info }: Props) {
       <td className='w-10'>
         <File size={15} className='text-zinc-600' />{' '}
       </td>
-      <td className='w-40 px-5'>
-        <p className='text-sm font-mono text-zinc-800'>{info.name}</p>
+      <td className='w-52 px-5 text-sm max-w-52 font-mono text-zinc-800 overflow-ellipsis overflow-hidden whitespace-nowrap'>
+        {info.name}
       </td>
-      <td className='w-52 px-5'>
-        <p className='text-sm font-mono text-zinc-800'>{dayjs().to(info.createdAt)}</p>
-      </td>
-      <td className='w-52 px-5'>
-        <p className='text-sm font-mono text-zinc-800'>{dayjs().to(info.updatedAt)}</p>
-      </td>
+      <td className='w-52 px-5 text-sm font-mono text-zinc-800'>{dayjs().to(info.createdAt)}</td>
+      <td className='w-52 px-5 text-sm font-mono text-zinc-800'>{dayjs().to(info.updatedAt)}</td>
     </tr>
   )
 }
