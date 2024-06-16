@@ -1,4 +1,4 @@
-import { ItemInfo, Kind, SystemOutputCode } from '~/types'
+import { FSLocation, ItemInfo, Kind, SystemOutputCode } from '~/types'
 import { FolderDisplay } from '~/components/folder-display'
 import { FileDisplay } from '~/components/file-display'
 import { UseFileSystem } from '~/hooks/use-file-system'
@@ -49,6 +49,14 @@ export function Ls({ fs }: Props) {
     }
   }
 
+  function openFile(location: FSLocation) {
+    const result = fs.open(location)
+
+    if (result.error) {
+      toast.error(result.message)
+    }
+  }
+
   if (items.length === 0) return <p className='p-5 font-mono text-sm text-zinc-600'>empty</p>
 
   return (
@@ -89,6 +97,7 @@ export function Ls({ fs }: Props) {
                 <FileDisplay
                   key={item.name}
                   info={item as ItemInfo<Kind.File>}
+                  onClick={openFile}
                   onRequestDelete={openAskDeleteFileDialog}
                 />
               )

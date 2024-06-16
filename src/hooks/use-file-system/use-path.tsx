@@ -1,16 +1,30 @@
 import { useState } from 'react'
 import { Directory, FileSystem, Kind } from '~/types'
-import { validatePath } from '~/utils/validate-path'
+import { safePath } from '~/utils/validate-path'
 
 export function usePath(initialPath: Array<string> = [], fs: FileSystem) {
-  const [path, setPath] = useState(validatePath(initialPath, fs))
+  const [path, setPath] = useState(safePath(initialPath, fs)[1])
 
   function pwd() {
     return path
   }
 
   function cd(location: Array<string>) {
-    setPath(validatePath(location, fs))
+    const [found, pathLocation] = safePath(location, fs)
+
+    setPath(pathLocation)
+
+    return found
+  }
+
+  function goBack() {
+    setPath(currentPath => {
+      if (currentPath.length > 1) {
+        return currentPath.slice(0, currentPath.length - 1)
+      }
+
+      return currentPath
+    })
   }
 
   function _getCurrentNode() {
@@ -34,6 +48,7 @@ export function usePath(initialPath: Array<string> = [], fs: FileSystem) {
   return {
     pwd,
     cd,
+    goBack,
     _getCurrentNode
   }
 }

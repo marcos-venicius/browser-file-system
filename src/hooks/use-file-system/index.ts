@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { usePath } from './use-path'
 import {
   Directory,
+  FSLocation,
   File,
   FileSystem,
   ItemInfo,
@@ -15,6 +16,7 @@ import { validFolderName } from '~/utils/valid-folder-name'
 import { validFileName } from '~/utils/valid-file-name'
 import { Data } from './data'
 import { toast } from 'sonner'
+import { safePath } from '~/utils/validate-path'
 
 function useFileSystemLoader(): [FileSystem, React.Dispatch<React.SetStateAction<FileSystem>>] {
   const [fileSystem, setFileSystem] = useState<FileSystem>(Directory.create('/', ['/']))
@@ -27,6 +29,7 @@ function useFileSystemLoader(): [FileSystem, React.Dispatch<React.SetStateAction
 }
 
 export function useFileSystem(): UseFileSystem {
+  const [openedFileLocation, setOpenedFileLocation] = useState<FSLocation | null>(null)
   const [fileSystem, setFileSystem] = useFileSystemLoader()
 
   const path = usePath(['/'], fileSystem)
@@ -39,7 +42,7 @@ export function useFileSystem(): UseFileSystem {
     return node.children.map(item => item.o.info())
   }
 
-  function rmdir(location: Array<string>, force = false): SystemOutput {
+  function rmdir(location: FSLocation, force = false): SystemOutput {
     let slow: FileSystem | null = null
     let fast = [fileSystem]
 
@@ -76,7 +79,7 @@ export function useFileSystem(): UseFileSystem {
     return SystemOutput.success()
   }
 
-  function rmfile(location: Array<string>): SystemOutput {
+  function rmfile(location: FSLocation): SystemOutput {
     let slow: FileSystem | null = null
     let fast = [fileSystem]
 
@@ -185,13 +188,53 @@ export function useFileSystem(): UseFileSystem {
     return SystemOutput.success()
   }
 
+  function open(location: FSLocation): SystemOutput {
+    const [fileExists] = safePath(location, fileSystem)
+
+    if (!fileExists) return SystemOutput.error('this file does not exists')
+
+    setOpenedFileLocation(location)
+
+    return SystemOutput.success()
+  }
+
+  function close() {
+    setOpenedFileLocation(null)
+
+    return SystemOutput.success()
+  }
+
+  function cd(location: FSLocation): SystemOutput {
+    setOpenedFileLocation(null)
+
+    const result = path.cd(location)
+
+    if (!result) return SystemOutput.error('directory not found')
+
+    return SystemOutput.success()
+  }
+
+  function goBack(): SystemOutput {
+    path.goBack()
+
+    return SystemOutput.success()
+  }
+
+  function pwd() {
+    return path.pwd()
+  }
+
   useEffect(() => {
     Data.save(fileSystem).catch(() => toast.error('could not save the state'))
   }, [fileSystem])
 
   return {
-    pwd: path.pwd,
-    cd: path.cd,
+    pwd,
+    cd,
+    goBack,
+    open,
+    openedFile: openedFileLocation,
+    close,
     ls,
     rmdir,
     rmfile,
@@ -201,11 +244,15 @@ export function useFileSystem(): UseFileSystem {
 }
 
 export type UseFileSystem = {
+  goBack(): SystemOutput
   pwd(): Array<PathLocation>
-  cd(location: Array<string>): void
+  cd(location: FSLocation): SystemOutput
   ls(): Array<ItemInfo>
-  rmdir(location: Array<string>, force?: boolean): SystemOutput
-  rmfile(location: Array<string>): SystemOutput
+  openedFile: null | FSLocation
+  rmdir(location: FSLocation, force?: boolean): SystemOutput
+  rmfile(location: FSLocation): SystemOutput
+  open(location: FSLocation): SystemOutput
+  close(): SystemOutput
   mkdir(name: string): SystemOutput
   touch(name: string): SystemOutput
 }

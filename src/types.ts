@@ -11,6 +11,8 @@ export enum Kind {
   File = 'file'
 }
 
+export type FSLocation = Array<string>
+
 export function formatKind(kind: Kind) {
   switch (kind) {
     case Kind.Dir:
@@ -54,7 +56,7 @@ export type FileSystem<T extends Kind = Kind.Dir | Kind.File> = { kind: T } & (T
   : DirKind)
 
 export type PathLocation = {
-  location: Array<string>
+  location: FSLocation
   name: string
 }
 
@@ -62,7 +64,7 @@ export type ItemInfo<T extends Kind = Kind.File | Kind.Dir> = {
   name: string
   createdAt: Date
   updatedAt: Date
-  location: Array<string>
+  location: FSLocation
   kind: T
 }
 
@@ -75,15 +77,10 @@ abstract class Item<T extends Kind> {
   public readonly name: string
   public readonly updatedAt: Date
   public readonly createdAt: Date
-  public readonly location: Array<string>
+  public readonly location: FSLocation
   private readonly kind: T
 
-  constructor(
-    name: string,
-    kind: T,
-    location: Array<string>,
-    additionalOptions?: AdditionalOptions
-  ) {
+  constructor(name: string, kind: T, location: FSLocation, additionalOptions?: AdditionalOptions) {
     this.name = name
     this.kind = kind
     this.location = location
@@ -115,7 +112,7 @@ export class File extends Item<Kind.File> {
 
   constructor(
     name: string,
-    location: Array<string>,
+    location: FSLocation,
     content = '',
     additionalOptions?: AdditionalOptions
   ) {
@@ -126,7 +123,7 @@ export class File extends Item<Kind.File> {
 
   public static create(
     name: string,
-    location: Array<string>,
+    location: FSLocation,
     content = '',
     additionalOptions?: AdditionalOptions
   ): FileSystem<Kind.File> {
@@ -142,7 +139,7 @@ export class Directory extends Item<Kind.Dir> {
 
   constructor(
     name: string,
-    location: Array<string>,
+    location: FSLocation,
     children: Array<FileSystem> = [],
     additionalOptions?: AdditionalOptions
   ) {
@@ -157,7 +154,7 @@ export class Directory extends Item<Kind.Dir> {
 
   public static create(
     name: string,
-    location: Array<string>,
+    location: FSLocation,
     children: Array<FileSystem> = [],
     additionalOptions?: AdditionalOptions
   ): FileSystem<Kind.Dir> {

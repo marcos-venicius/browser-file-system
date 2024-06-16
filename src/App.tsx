@@ -31,21 +31,31 @@ export function App() {
       <CreateFileDialog ref={createFileDialog} fs={fs} />
 
       <main className='w-full mx-auto max-w-6xl'>
-        <header className='w-full p-5 flex items-center justify-between gap-5 border-b'>
+        <header className='w-full py-5 flex items-center justify-between gap-5 border-b'>
           <CurrentPath fs={fs} />
 
           <div className='flex items-center gap-3'>
-            <Button size='sm' className='p-2' variant='ghost' onClick={openCreateFileDialog}>
+            <Button
+              size='sm'
+              className='p-2'
+              variant='ghost'
+              onClick={openCreateFileDialog}
+              disabled={fs.openedFile !== null}>
               <FilePlus className='text-zinc-600' size={22} />
             </Button>
 
-            <Button size='sm' className='p-2' variant='ghost' onClick={openCreateFolderDialog}>
+            <Button
+              size='sm'
+              className='p-2'
+              variant='ghost'
+              onClick={openCreateFolderDialog}
+              disabled={fs.openedFile !== null}>
               <FolderPlus className='text-zinc-600' size={22} />
             </Button>
           </div>
         </header>
 
-        <Ls fs={fs} />
+        {fs.openedFile ? <>{fs.openedFile.join('/')}</> : <Ls fs={fs} />}
       </main>
     </>
   )
