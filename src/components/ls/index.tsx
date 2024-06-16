@@ -5,6 +5,7 @@ import { UseFileSystem } from '~/hooks/use-file-system'
 import { toast } from 'sonner'
 import { AskDeleteFolderDialog } from '../ask-delete-folder-dialog'
 import { useRef } from 'react'
+import { AskDeleteFileDialog } from '../ask-delete-file-dialog'
 
 type Props = {
   fs: UseFileSystem
@@ -14,10 +15,17 @@ export function Ls({ fs }: Props) {
   const items = fs.ls()
 
   const askDeleteFolderDialog = useRef<AskDeleteFolderDialog>(null)
+  const askDeleteFileDialog = useRef<AskDeleteFileDialog>(null)
 
   function openAskDeleteFolderDialog(location: Array<string>) {
     if (askDeleteFolderDialog.current) {
       askDeleteFolderDialog.current.open(location)
+    }
+  }
+
+  function openAskDeleteFileDialog(location: Array<string>) {
+    if (askDeleteFileDialog.current) {
+      askDeleteFileDialog.current.open(location)
     }
   }
 
@@ -33,11 +41,20 @@ export function Ls({ fs }: Props) {
     }
   }
 
+  function requestDeleteFile(location: Array<string>) {
+    const result = fs.rmfile(location)
+
+    if (result.error) {
+      toast.error(result.message)
+    }
+  }
+
   if (items.length === 0) return <p className='p-5 font-mono text-sm text-zinc-600'>empty</p>
 
   return (
     <>
       <AskDeleteFolderDialog ref={askDeleteFolderDialog} deleteFunction={requestDeleteFolder} />
+      <AskDeleteFileDialog ref={askDeleteFileDialog} deleteFunction={requestDeleteFile} />
 
       <table className='block p-5'>
         <thead>
@@ -68,7 +85,13 @@ export function Ls({ fs }: Props) {
             }
 
             if (item.kind === Kind.File) {
-              return <FileDisplay key={item.name} info={item as ItemInfo<Kind.File>} />
+              return (
+                <FileDisplay
+                  key={item.name}
+                  info={item as ItemInfo<Kind.File>}
+                  onRequestDelete={openAskDeleteFileDialog}
+                />
+              )
             }
           })}
         </tbody>

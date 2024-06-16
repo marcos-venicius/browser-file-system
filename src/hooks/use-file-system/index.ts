@@ -76,6 +76,39 @@ export function useFileSystem(): UseFileSystem {
     return SystemOutput.success()
   }
 
+  function rmfile(location: Array<string>): SystemOutput {
+    let slow: FileSystem | null = null
+    let fast = [fileSystem]
+
+    for (const chunk of location.slice(0, location.length - 1)) {
+      for (const item of fast) {
+        if (item.o.name === chunk && item.kind === Kind.Dir) {
+          fast = (item.o as Directory).children
+          slow = item
+          break
+        }
+      }
+    }
+
+    if (!slow) return SystemOutput.error('parent path not found')
+
+    const fileName = location[location.length - 1]
+
+    const file: File | null = (slow.o as Directory).children.find(
+      x => x.o.name === fileName && x.kind === Kind.File
+    )?.o as File
+
+    if (!file) return SystemOutput.error('file not found')
+
+    const dir = slow.o as Directory
+
+    dir.removeChildren(Kind.File, fileName)
+
+    setFileSystem({ ...fileSystem })
+
+    return SystemOutput.success()
+  }
+
   function mkdir(name: string): SystemOutput {
     const folderName = validFolderName(name)
 
@@ -161,6 +194,7 @@ export function useFileSystem(): UseFileSystem {
     cd: path.cd,
     ls,
     rmdir,
+    rmfile,
     mkdir,
     touch
   }
@@ -171,6 +205,7 @@ export type UseFileSystem = {
   cd(location: Array<string>): void
   ls(): Array<ItemInfo>
   rmdir(location: Array<string>, force?: boolean): SystemOutput
+  rmfile(location: Array<string>): SystemOutput
   mkdir(name: string): SystemOutput
   touch(name: string): SystemOutput
 }
