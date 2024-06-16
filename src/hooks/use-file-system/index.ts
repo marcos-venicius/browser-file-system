@@ -8,6 +8,7 @@ import {
   Kind,
   PathLocation,
   SystemOutput,
+  SystemOutputCode,
   formatKind
 } from '../../types'
 import { validFolderName } from '~/utils/valid-folder-name'
@@ -38,14 +39,48 @@ export function useFileSystem(): UseFileSystem {
     return node.children.map(item => item.o.info())
   }
 
+  function rmdir(location: Array<string>, force = false): SystemOutput {
+    let slow: FileSystem | null = null
+    let fast = [fileSystem]
+
+    for (const chunk of location.slice(0, location.length - 1)) {
+      for (const item of fast) {
+        if (item.o.name === chunk && item.kind === Kind.Dir) {
+          fast = (item.o as Directory).children
+          slow = item
+          break
+        }
+      }
+    }
+
+    if (!slow) return SystemOutput.error('parent path not found')
+
+    const folderName = location[location.length - 1]
+
+    const folder: Directory | null = (slow.o as Directory).children.find(
+      x => x.o.name === folderName && x.kind === Kind.Dir
+    )?.o as Directory
+
+    if (!folder) return SystemOutput.error('directory not found')
+
+    if (folder.children.length > 0 && !force) {
+      return SystemOutput.error('directory not empty', SystemOutputCode.DirectoryNotEmpty)
+    }
+
+    const dir = slow.o as Directory
+
+    dir.removeChildren(Kind.Dir, folderName)
+
+    setFileSystem({ ...fileSystem })
+
+    return SystemOutput.success()
+  }
+
   function mkdir(name: string): SystemOutput {
     const folderName = validFolderName(name)
 
     if (!folderName) {
-      return {
-        error: true,
-        message: 'invalid folder name'
-      }
+      return SystemOutput.error('invalid folder name')
     }
 
     let slow: FileSystem | null = null
@@ -62,18 +97,12 @@ export function useFileSystem(): UseFileSystem {
     }
 
     if (!slow) {
-      return {
-        error: true,
-        message: 'current path not found'
-      }
+      return SystemOutput.error('current path not found')
     }
 
     for (const child of (slow.o as Directory).children) {
       if (child.o.name === folderName) {
-        return {
-          error: true,
-          message: `already exists a ${formatKind(child.kind)} with this name`
-        }
+        return SystemOutput.error(`already exists a ${formatKind(child.kind)} with this name`)
       }
     }
 
@@ -83,20 +112,14 @@ export function useFileSystem(): UseFileSystem {
 
     setFileSystem({ ...fileSystem })
 
-    return {
-      error: false,
-      message: ''
-    }
+    return SystemOutput.success()
   }
 
   function touch(name: string): SystemOutput {
     const fileName = validFileName(name)
 
     if (!fileName) {
-      return {
-        error: true,
-        message: 'invalid file name'
-      }
+      return SystemOutput.error('invalid file name')
     }
 
     let slow: FileSystem | null = null
@@ -113,18 +136,12 @@ export function useFileSystem(): UseFileSystem {
     }
 
     if (!slow) {
-      return {
-        error: true,
-        message: 'current path not found'
-      }
+      return SystemOutput.error('current path not found')
     }
 
     for (const child of (slow.o as Directory).children) {
       if (child.o.name === fileName) {
-        return {
-          error: true,
-          message: `already exists a ${formatKind(child.kind)} with this name`
-        }
+        return SystemOutput.error(`already exists a ${formatKind(child.kind)} with this name`)
       }
     }
 
@@ -132,10 +149,7 @@ export function useFileSystem(): UseFileSystem {
 
     setFileSystem({ ...fileSystem })
 
-    return {
-      error: false,
-      message: ''
-    }
+    return SystemOutput.success()
   }
 
   useEffect(() => {
@@ -146,6 +160,7 @@ export function useFileSystem(): UseFileSystem {
     pwd: path.pwd,
     cd: path.cd,
     ls,
+    rmdir,
     mkdir,
     touch
   }
@@ -155,6 +170,7 @@ export type UseFileSystem = {
   pwd(): Array<PathLocation>
   cd(location: Array<string>): void
   ls(): Array<ItemInfo>
+  rmdir(location: Array<string>, force?: boolean): SystemOutput
   mkdir(name: string): SystemOutput
   touch(name: string): SystemOutput
 }

@@ -22,9 +22,31 @@ export function formatKind(kind: Kind) {
   }
 }
 
-export type SystemOutput = {
-  error: boolean
-  message: string
+export enum SystemOutputCode {
+  DirectoryNotEmpty = 'directory-not-empty',
+  Generic = 'generic',
+  Success = 'success'
+}
+
+export class SystemOutput {
+  public readonly error: boolean = false
+  public readonly message: string = ''
+  public readonly code: SystemOutputCode = SystemOutputCode.Generic
+
+  constructor(error: boolean, message: string, code?: SystemOutputCode) {
+    this.error = error
+    this.message = message
+
+    if (code) this.code = code
+  }
+
+  public static error(message: string, code?: SystemOutputCode) {
+    return new SystemOutput(true, message, code)
+  }
+
+  public static success() {
+    return new SystemOutput(false, '', SystemOutputCode.Success)
+  }
 }
 
 export type FileSystem<T extends Kind = Kind.Dir | Kind.File> = { kind: T } & (T extends Kind.File
@@ -116,7 +138,7 @@ export class File extends Item<Kind.File> {
 }
 
 export class Directory extends Item<Kind.Dir> {
-  public readonly children: Array<FileSystem>
+  public children: Array<FileSystem> = []
 
   constructor(
     name: string,
@@ -127,6 +149,10 @@ export class Directory extends Item<Kind.Dir> {
     super(name, Kind.Dir, location, additionalOptions)
 
     this.children = children
+  }
+
+  public removeChildren(kind: Kind, name: string) {
+    this.children = this.children.filter(x => x.kind !== kind || x.o.name !== name)
   }
 
   public static create(

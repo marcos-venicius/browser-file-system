@@ -13,9 +13,10 @@ dayjs.locale('pt-br')
 type Props = {
   info: ItemInfo<Kind.Dir>
   onClick(location: Array<string>): void
+  onRequestDelete(location: Array<string>): void
 }
 
-export function FolderDisplay({ info, onClick }: Props) {
+export function FolderDisplay({ info, onClick, onRequestDelete }: Props) {
   const [hoveringActions, setHoveringActions] = useState(false)
 
   return (
@@ -40,7 +41,10 @@ export function FolderDisplay({ info, onClick }: Props) {
         className='absolute h-full right-0 top-1/2 -translate-y-1/2 flex items-center justify-end gap-1 transition-opacity opacity-0 group-hover:opacity-100'
         onMouseEnter={setHoveringActions.bind(null, true)}
         onMouseLeave={setHoveringActions.bind(null, false)}>
-        <Button variant='link' className='h-8 w-10 p-0 flex items-center justify-center'>
+        <Button
+          variant='link'
+          className='h-8 w-10 p-0 flex items-center justify-center'
+          onClick={onRequestDelete.bind(null, info.location)}>
           <Trash size={16} className='text-red-500' />
         </Button>
       </td>

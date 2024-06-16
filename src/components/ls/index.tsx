@@ -1,7 +1,10 @@
-import { ItemInfo, Kind } from '~/types'
+import { ItemInfo, Kind, SystemOutputCode } from '~/types'
 import { FolderDisplay } from '~/components/folder-display'
 import { FileDisplay } from '~/components/file-display'
 import { UseFileSystem } from '~/hooks/use-file-system'
+import { toast } from 'sonner'
+import { AskDeleteFolderDialog } from '../ask-delete-folder-dialog'
+import { useRef } from 'react'
 
 type Props = {
   fs: UseFileSystem
@@ -10,37 +13,66 @@ type Props = {
 export function Ls({ fs }: Props) {
   const items = fs.ls()
 
+  const askDeleteFolderDialog = useRef<AskDeleteFolderDialog>(null)
+
+  function openAskDeleteFolderDialog(location: Array<string>) {
+    if (askDeleteFolderDialog.current) {
+      askDeleteFolderDialog.current.open(location)
+    }
+  }
+
+  function requestDeleteFolder(location: Array<string>, force = false) {
+    const result = fs.rmdir(location, force)
+
+    if (result.error && result.code !== SystemOutputCode.DirectoryNotEmpty) {
+      toast.error(result.message)
+    }
+
+    if (result.code === SystemOutputCode.DirectoryNotEmpty) {
+      openAskDeleteFolderDialog(location)
+    }
+  }
+
   if (items.length === 0) return <p className='p-5 font-mono text-sm text-zinc-600'>empty</p>
 
   return (
-    <table className='block p-5'>
-      <thead>
-        <tr className='px-2 block'>
-          <th className='w-10'></th>
-          <th className='text-sm text-zinc-600 w-52 px-5' align='left'>
-            name
-          </th>
-          <th className='text-sm text-zinc-600 w-52 px-5' align='left'>
-            created at
-          </th>
-          <th className='text-sm text-zinc-600 w-52 px-5' align='left'>
-            updated at
-          </th>
-        </tr>
-      </thead>
-      <tbody className='block mt-5'>
-        {items.map(item => {
-          if (item.kind === Kind.Dir) {
-            return (
-              <FolderDisplay key={item.name} info={item as ItemInfo<Kind.Dir>} onClick={fs.cd} />
-            )
-          }
+    <>
+      <AskDeleteFolderDialog ref={askDeleteFolderDialog} deleteFunction={requestDeleteFolder} />
 
-          if (item.kind === Kind.File) {
-            return <FileDisplay key={item.name} info={item as ItemInfo<Kind.File>} />
-          }
-        })}
-      </tbody>
-    </table>
+      <table className='block p-5'>
+        <thead>
+          <tr className='px-2 block'>
+            <th className='w-10'></th>
+            <th className='text-sm text-zinc-600 w-52 px-5' align='left'>
+              name
+            </th>
+            <th className='text-sm text-zinc-600 w-52 px-5' align='left'>
+              created at
+            </th>
+            <th className='text-sm text-zinc-600 w-52 px-5' align='left'>
+              updated at
+            </th>
+          </tr>
+        </thead>
+        <tbody className='block mt-5'>
+          {items.map(item => {
+            if (item.kind === Kind.Dir) {
+              return (
+                <FolderDisplay
+                  key={item.name}
+                  info={item as ItemInfo<Kind.Dir>}
+                  onClick={fs.cd}
+                  onRequestDelete={location => requestDeleteFolder(location)}
+                />
+              )
+            }
+
+            if (item.kind === Kind.File) {
+              return <FileDisplay key={item.name} info={item as ItemInfo<Kind.File>} />
+            }
+          })}
+        </tbody>
+      </table>
+    </>
   )
 }
