@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { usePath } from './use-path'
 import {
   Directory,
+  File,
   FileSystem,
   ItemInfo,
   Kind,
@@ -10,6 +11,7 @@ import {
   formatKind
 } from '../../types'
 import { validFolderName } from '~/utils/valid-folder-name'
+import { validFileName } from '~/utils/valid-file-name'
 import { Data } from './data'
 import { toast } from 'sonner'
 
@@ -87,6 +89,55 @@ export function useFileSystem(): UseFileSystem {
     }
   }
 
+  function touch(name: string): SystemOutput {
+    const fileName = validFileName(name)
+
+    if (!fileName) {
+      return {
+        error: true,
+        message: 'invalid file name'
+      }
+    }
+
+    let slow: FileSystem | null = null
+    let fast = [fileSystem]
+
+    for (const chunk of path.pwd()) {
+      for (const item of fast) {
+        if (item.o.name === chunk.name && item.kind === Kind.Dir) {
+          fast = (item.o as Directory).children
+          slow = item
+          break
+        }
+      }
+    }
+
+    if (!slow) {
+      return {
+        error: true,
+        message: 'current path not found'
+      }
+    }
+
+    for (const child of (slow.o as Directory).children) {
+      if (child.o.name === fileName) {
+        return {
+          error: true,
+          message: `already exists a ${formatKind(child.kind)} with this name`
+        }
+      }
+    }
+
+    (slow.o as Directory).children.unshift(File.create(fileName, [...slow.o.location, fileName]))
+
+    setFileSystem({ ...fileSystem })
+
+    return {
+      error: false,
+      message: ''
+    }
+  }
+
   useEffect(() => {
     Data.save(fileSystem).catch(() => toast.error('could not save the state'))
   }, [fileSystem])
@@ -95,7 +146,8 @@ export function useFileSystem(): UseFileSystem {
     pwd: path.pwd,
     cd: path.cd,
     ls,
-    mkdir
+    mkdir,
+    touch
   }
 }
 
@@ -104,4 +156,5 @@ export type UseFileSystem = {
   cd(location: Array<string>): void
   ls(): Array<ItemInfo>
   mkdir(name: string): SystemOutput
+  touch(name: string): SystemOutput
 }
