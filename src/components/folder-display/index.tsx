@@ -19,13 +19,19 @@ type Props = {
 export function FolderDisplay({ info, onClick, onRequestDelete }: Props) {
   const [hoveringActions, setHoveringActions] = useState(false)
 
+  function handleOnClick() {
+    if (hoveringActions) return
+
+    onClick(info.location)
+  }
+
   return (
     <tr
       className={cn(
         'group relative mb-1 block p-2 rounded transition-colors cursor-pointer',
         !hoveringActions && 'hover:bg-zinc-100'
       )}
-      onClick={!hoveringActions ? onClick.bind(null, info.location) : undefined}>
+      onClick={handleOnClick}>
       <td className='w-10'>
         <Folder size={15} className='text-zinc-600' />
       </td>

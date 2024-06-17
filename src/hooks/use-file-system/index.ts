@@ -34,6 +34,35 @@ export function useFileSystem(): UseFileSystem {
 
   const path = usePath(['/'], fileSystem)
 
+  function read(location: FSLocation): SystemOutput<string | null> {
+    let slow: FileSystem | null = null
+    let fast = [fileSystem]
+
+    for (const chunk of location.slice(0, location.length - 1)) {
+      for (const item of fast) {
+        if (item.o.name === chunk && item.kind === Kind.Dir) {
+          fast = (item.o as Directory).children
+          slow = item
+          break
+        }
+      }
+    }
+
+    const filename = location.at(-1)
+
+    if (!slow) return SystemOutput.error('parent path not found')
+
+    for (const file of (slow.o as Directory).children) {
+      if (file.kind === Kind.File && file.o.name === filename) {
+        const fileContent = (file.o as File).content
+
+        return SystemOutput.data(fileContent)
+      }
+    }
+
+    return SystemOutput.error('file not found')
+  }
+
   function ls() {
     const node = path._getCurrentNode()
 
@@ -224,6 +253,41 @@ export function useFileSystem(): UseFileSystem {
     return path.pwd()
   }
 
+  function echo(content: string): SystemOutput {
+    const location = openedFileLocation || []
+
+    let slow: FileSystem | null = null
+    let fast = [fileSystem]
+
+    for (const chunk of location.slice(0, location.length - 1)) {
+      for (const item of fast) {
+        if (item.o.name === chunk && item.kind === Kind.Dir) {
+          fast = (item.o as Directory).children
+          slow = item
+          break
+        }
+      }
+    }
+
+    const filename = location.at(-1)
+
+    if (!slow) return SystemOutput.error('parent path not found')
+
+    for (const file of (slow.o as Directory).children) {
+      if (file.kind === Kind.File && file.o.name === filename) {
+        const fileContent = file.o as File
+
+        fileContent.content = content
+
+        setFileSystem({ ...fileSystem })
+
+        return SystemOutput.success()
+      }
+    }
+
+    return SystemOutput.error('file not found')
+  }
+
   useEffect(() => {
     Data.save(fileSystem).catch(() => toast.error('could not save the state'))
   }, [fileSystem])
@@ -233,6 +297,8 @@ export function useFileSystem(): UseFileSystem {
     cd,
     goBack,
     open,
+    read,
+    echo,
     openedFile: openedFileLocation,
     close,
     ls,
@@ -246,7 +312,9 @@ export function useFileSystem(): UseFileSystem {
 export type UseFileSystem = {
   goBack(): SystemOutput
   pwd(): Array<PathLocation>
+  echo(content: string): SystemOutput
   cd(location: FSLocation): SystemOutput
+  read(location: FSLocation): SystemOutput<string | null>
   ls(): Array<ItemInfo>
   openedFile: null | FSLocation
   rmdir(location: FSLocation, force?: boolean): SystemOutput

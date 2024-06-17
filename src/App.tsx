@@ -6,6 +6,7 @@ import { useRef } from 'react'
 import { CreateFolderDialog } from './components/create-folder-dialog'
 import { Button } from './components/ui/button'
 import { CreateFileDialog } from './components/create-file-dialog'
+import { Cat } from './components/cat'
 
 export function App() {
   const fs = useFileSystem()
@@ -31,7 +32,7 @@ export function App() {
       <CreateFileDialog ref={createFileDialog} fs={fs} />
 
       <main className='w-full mx-auto max-w-6xl'>
-        <header className='w-full py-5 flex items-center justify-between gap-5 border-b'>
+        <header className='w-full py-5 flex items-center justify-between gap-5 border-b h-20'>
           <CurrentPath fs={fs} />
 
           <div className='flex items-center gap-3'>
@@ -55,7 +56,7 @@ export function App() {
           </div>
         </header>
 
-        {fs.openedFile ? <>{fs.openedFile.join('/')}</> : <Ls fs={fs} />}
+        {fs.openedFile ? <Cat fs={fs} /> : <Ls fs={fs} />}
       </main>
     </>
   )

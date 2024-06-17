@@ -27,27 +27,34 @@ export function formatKind(kind: Kind) {
 export enum SystemOutputCode {
   DirectoryNotEmpty = 'directory-not-empty',
   Generic = 'generic',
-  Success = 'success'
+  Success = 'success',
+  Data = 'data'
 }
 
-export class SystemOutput {
+export class SystemOutput<TData = null> {
   public readonly error: boolean = false
   public readonly message: string = ''
   public readonly code: SystemOutputCode = SystemOutputCode.Generic
+  public readonly data: TData
 
-  constructor(error: boolean, message: string, code?: SystemOutputCode) {
+  constructor(error: boolean, message: string, data: TData, code?: SystemOutputCode) {
     this.error = error
     this.message = message
+    this.data = data
 
     if (code) this.code = code
   }
 
   public static error(message: string, code?: SystemOutputCode) {
-    return new SystemOutput(true, message, code)
+    return new SystemOutput(true, message, null, code)
+  }
+
+  public static data<T>(data: T) {
+    return new SystemOutput(false, '', data, SystemOutputCode.Data)
   }
 
   public static success() {
-    return new SystemOutput(false, '', SystemOutputCode.Success)
+    return new SystemOutput(false, '', null, SystemOutputCode.Success)
   }
 }
 
@@ -108,7 +115,7 @@ abstract class Item<T extends Kind> {
 }
 
 export class File extends Item<Kind.File> {
-  public readonly content: string
+  public content: string
 
   constructor(
     name: string,
