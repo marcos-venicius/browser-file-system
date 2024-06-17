@@ -64,7 +64,7 @@ export function Ls({ fs }: Props) {
       <AskDeleteFolderDialog ref={askDeleteFolderDialog} deleteFunction={requestDeleteFolder} />
       <AskDeleteFileDialog ref={askDeleteFileDialog} deleteFunction={requestDeleteFile} />
 
-      <table className='block p-5'>
+      <table className='block p-5 w-full h-textarea overflow-x-auto'>
         <thead>
           <tr className='px-2 block'>
             <th className='w-10'></th>

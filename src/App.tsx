@@ -1,4 +1,5 @@
-import { FilePlus, FolderPlus } from 'lucide-react'
+import { CustomContextMenu } from '~/components/custom-context-menu'
+import { ChevronLeft, FilePlus, FolderPlus } from 'lucide-react'
 import { useFileSystem } from './hooks/use-file-system'
 import { CurrentPath } from './components/current-path'
 import { Ls } from './components/ls'
@@ -56,7 +57,31 @@ export function App() {
           </div>
         </header>
 
-        {fs.openedFile ? <Cat fs={fs} /> : <Ls fs={fs} />}
+        {fs.openedFile ? (
+          <Cat fs={fs} />
+        ) : (
+          <CustomContextMenu
+            render={[
+              <CustomContextMenu.Option
+                onClick={fs.goBack}
+                disabled={fs.pwd().length === 1}
+                icon={<ChevronLeft className='text-zinc-600' size={16} />}>
+                go back
+              </CustomContextMenu.Option>,
+              <CustomContextMenu.Option
+                icon={<FilePlus className='text-zinc-600' size={16} />}
+                onClick={openCreateFileDialog}>
+                new file
+              </CustomContextMenu.Option>,
+              <CustomContextMenu.Option
+                icon={<FolderPlus className='text-zinc-600' size={16} />}
+                onClick={openCreateFolderDialog}>
+                new folder
+              </CustomContextMenu.Option>
+            ]}>
+            <Ls fs={fs} />
+          </CustomContextMenu>
+        )}
       </main>
     </>
   )

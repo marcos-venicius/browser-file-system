@@ -25,7 +25,7 @@ export function FolderDisplay({ info, onClick, onRequestDelete }: Props) {
         <CustomContextMenu.Option
           icon={<Trash size={16} className='text-red-500' />}
           onClick={onRequestDelete.bind(null, info.location)}>
-            delete
+          delete
         </CustomContextMenu.Option>
       ]}>
       <tr

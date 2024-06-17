@@ -24,11 +24,12 @@ type OptionProps = {
   children: string
   onClick?(): void
   icon?: React.ReactNode
+  disabled?: boolean
 }
 
-function Option({ children, icon, onClick }: OptionProps) {
+function Option({ children, icon, disabled, onClick }: OptionProps) {
   return (
-    <ContextMenuItem className='flex gap-3 items-center' onClick={onClick}>
+    <ContextMenuItem className='flex gap-3 items-center' onClick={onClick} disabled={disabled}>
       {icon}
       {children}
     </ContextMenuItem>
