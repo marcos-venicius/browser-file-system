@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogFooter
 } from '~/components/ui/alert-dialog'
-import { Button } from '../ui/button'
+import { Button } from '../../components/ui/button'
 
 type Props = {
   deleteFunction(location: Array<string>, force: boolean): void

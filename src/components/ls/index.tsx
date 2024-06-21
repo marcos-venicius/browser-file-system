@@ -3,9 +3,9 @@ import { FolderDisplay } from '~/components/folder-display'
 import { FileDisplay } from '~/components/file-display'
 import { UseFileSystem } from '~/hooks/use-file-system'
 import { toast } from 'sonner'
-import { AskDeleteFolderDialog } from '../ask-delete-folder-dialog'
 import { useRef } from 'react'
-import { AskDeleteFileDialog } from '../ask-delete-file-dialog'
+import { AskDeleteFolderDialog } from '~/dialogs/ask-delete-folder-dialog'
+import { AskDeleteFileDialog } from '~/dialogs/ask-delete-file-dialog'
 
 type Props = {
   fs: UseFileSystem

@@ -4,9 +4,9 @@ import { useFileSystem } from './hooks/use-file-system'
 import { CurrentPath } from './components/current-path'
 import { Ls } from './components/ls'
 import { useRef } from 'react'
-import { CreateFolderDialog } from './components/create-folder-dialog'
 import { Button } from './components/ui/button'
-import { CreateFileDialog } from './components/create-file-dialog'
+import { CreateFolderDialog } from '~/dialogs/create-folder-dialog'
+import { CreateFileDialog } from '~/dialogs/create-file-dialog'
 import { Cat } from './components/cat'
 
 export function App() {

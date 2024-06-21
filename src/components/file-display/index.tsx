@@ -1,7 +1,7 @@
 import 'dayjs/locale/pt-br'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { File, Trash } from 'lucide-react'
+import { File, Pencil, Trash } from 'lucide-react'
 import { ItemInfo, Kind } from '~/types'
 import { CustomContextMenu } from '../custom-context-menu'
 
@@ -12,6 +12,7 @@ type Props = {
   info: ItemInfo<Kind.File>
   onClick(location: Array<string>): void
   onRequestDelete(location: Array<string>): void
+  onRequestEditName(location: Array<string>): void
 }
 
 export function FileDisplay({ info, onClick, onRequestDelete }: Props) {
@@ -22,6 +23,10 @@ export function FileDisplay({ info, onClick, onRequestDelete }: Props) {
           icon={<Trash size={16} className='text-red-500' />}
           onClick={onRequestDelete.bind(null, info.location)}>
           delete
+        </CustomContextMenu.Option>,
+        <CustomContextMenu.Option
+          icon={<Pencil size={16} className='text-yellow-500' />}>
+          edit
         </CustomContextMenu.Option>
       ]}>
       <tr

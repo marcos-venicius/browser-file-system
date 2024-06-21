@@ -14,7 +14,7 @@ type Props = {
 export function CustomContextMenu({ children, render }: Props) {
   return (
     <ContextMenu>
-      <ContextMenuTrigger>{children}</ContextMenuTrigger>
+      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
       <ContextMenuContent>{React.Children.toArray(render)}</ContextMenuContent>
     </ContextMenu>
   )

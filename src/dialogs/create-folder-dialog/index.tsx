@@ -2,19 +2,19 @@ import React, { useImperativeHandle, useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { UseFileSystem } from '~/hooks/use-file-system'
 import { Input } from '~/components/ui/input'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../components/ui/form'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { settings } from '~/settings'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '../ui/button'
+import { Button } from '../../components/ui/button'
 import { toast } from 'sonner'
 
 type Props = {
   fs: UseFileSystem
 }
 
-export type CreateFileDialog = {
+export type CreateFolderDialog = {
   open(): void
 }
 
@@ -25,13 +25,13 @@ interface IFormInputs {
 const schema = z.object({
   name: z
     .string()
-    .regex(settings.VALID_FILE_NAME_REGEX, 'invalid filename name')
+    .regex(settings.VALID_FOLDER_NAME_REGEX, 'invalid folder name')
     .trim()
-    .min(1, 'invalid filename name')
+    .min(1, 'invalid folder name')
 })
 
-export const CreateFileDialog = React.forwardRef<CreateFileDialog, Props>(
-  function CreateFileDialogComponent({ fs }, ref) {
+export const CreateFolderDialog = React.forwardRef<CreateFolderDialog, Props>(
+  function CreateFolderDialogComponent({ fs }, ref) {
     const [open, setOpen] = useState(false)
     const form = useForm<IFormInputs>({
       defaultValues: {
@@ -55,7 +55,7 @@ export const CreateFileDialog = React.forwardRef<CreateFileDialog, Props>(
     }
 
     function onSubmit(data: IFormInputs) {
-      const result = fs.touch(data.name)
+      const result = fs.mkdir(data.name)
 
       if (result.error) {
         return toast.error(result.message)
@@ -71,7 +71,7 @@ export const CreateFileDialog = React.forwardRef<CreateFileDialog, Props>(
       <Dialog open={open} modal defaultOpen={false} onOpenChange={onChangeOpenState}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New file</DialogTitle>
+            <DialogTitle>New folder</DialogTitle>
           </DialogHeader>
 
           <Form {...form}>
@@ -81,7 +81,7 @@ export const CreateFileDialog = React.forwardRef<CreateFileDialog, Props>(
                 name='name'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>File name</FormLabel>
+                    <FormLabel>Folder name</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
