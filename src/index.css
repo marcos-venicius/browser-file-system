@@ -96,3 +96,17 @@ body,
     @apply bg-background text-foreground;
   }
 }
+
+textarea#cat-text-area {
+  /* For Firefox */
+  scrollbar-width: none;
+
+  /* For IE and Edge */
+  -ms-overflow-style: none;
+}
+
+/* For Chrome, Safari, and Opera */
+textarea#cat-text-area::-webkit-scrollbar {
+  display: none;
+}
+

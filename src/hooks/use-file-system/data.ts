@@ -1,4 +1,5 @@
 import { Directory, File, FileSystem } from '~/types'
+import { root } from './default-structure'
 
 type FileSystemJson = {
   kind: 'dir' | 'file'
@@ -40,7 +41,7 @@ export class Data {
     return new Promise<FileSystem>(resolve => {
       const fs = localStorage.getItem('fs')
 
-      if (!fs) return resolve(Directory.create('/', ['/']))
+      if (!fs) return resolve(root)
 
       const json: FileSystemJson = JSON.parse(fs)
 

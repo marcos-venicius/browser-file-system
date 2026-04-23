@@ -50,7 +50,8 @@ export function Cat({ fs }: Props) {
 
   return (
     <textarea
-      className='block focus:border-none focus:outline-none focus-visible:border-none w-full h-textarea p-5 bg-white resize-none whitespace-pre font-mono text-sm text-zinc-950'
+      id="cat-text-area"
+      className='block focus:border-none focus:outline-none focus-visible:border-none w-full h-textarea p-5 bg-white resize-none font-mono text-sm text-zinc-950 whitespace-pre-wrap'
       autoCorrect='off'
       autoComplete='off'
       spellCheck={false}
