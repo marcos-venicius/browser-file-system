@@ -1,7 +1,7 @@
 import 'dayjs/locale/pt-br'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { Folder, Trash } from 'lucide-react'
+import { Folder, Pencil, Trash } from 'lucide-react'
 import { ItemInfo, Kind } from '~/types'
 import { CustomContextMenu } from '../custom-context-menu'
 
@@ -12,9 +12,10 @@ type Props = {
   info: ItemInfo<Kind.Dir>
   onClick(location: Array<string>): void
   onRequestDelete(location: Array<string>): void
+  onRequestEdit(location: Array<string>): void
 }
 
-export function FolderDisplay({ info, onClick, onRequestDelete }: Props) {
+export function FolderDisplay({ info, onClick, onRequestDelete, onRequestEdit }: Props) {
   function handleOnClick() {
     onClick(info.location)
   }
@@ -26,6 +27,11 @@ export function FolderDisplay({ info, onClick, onRequestDelete }: Props) {
           icon={<Trash size={16} className='text-red-500' />}
           onClick={onRequestDelete.bind(null, info.location)}>
           delete
+        </CustomContextMenu.Option>,
+        <CustomContextMenu.Option
+          icon={<Pencil size={16} className='text-yellow-500' />}
+          onClick={onRequestEdit.bind(null, info.location)}>
+          rename
         </CustomContextMenu.Option>
       ]}>
       <tr

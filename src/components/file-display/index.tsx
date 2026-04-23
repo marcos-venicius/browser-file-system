@@ -15,7 +15,7 @@ type Props = {
   onRequestEditName(location: Array<string>): void
 }
 
-export function FileDisplay({ info, onClick, onRequestDelete }: Props) {
+export function FileDisplay({ info, onClick, onRequestDelete, onRequestEditName }: Props) {
   return (
     <CustomContextMenu
       render={[
@@ -25,8 +25,9 @@ export function FileDisplay({ info, onClick, onRequestDelete }: Props) {
           delete
         </CustomContextMenu.Option>,
         <CustomContextMenu.Option
-          icon={<Pencil size={16} className='text-yellow-500' />}>
-          edit
+          icon={<Pencil size={16} className='text-yellow-500' />}
+          onClick={onRequestEditName.bind(null, info.location)}>
+          rename
         </CustomContextMenu.Option>
       ]}>
       <tr

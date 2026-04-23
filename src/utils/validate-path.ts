@@ -1,9 +1,12 @@
 import { Directory, FSLocation, FileSystem, Kind, PathLocation } from '~/types'
 
-export function safePath(path: FSLocation, fs: FileSystem): [boolean, Array<PathLocation>] {
+type SafePathReturn = [true, Array<PathLocation>, Kind] | [false, Array<PathLocation>, null]
+
+export function safePath(path: FSLocation, fs: FileSystem): SafePathReturn {
   const pathLocation: Array<PathLocation> = []
 
   let current = [fs]
+  let kind: Kind | null = null;
 
   for (const pathName of path) {
     for (const item of current) {
@@ -12,14 +15,18 @@ export function safePath(path: FSLocation, fs: FileSystem): [boolean, Array<Path
           name: item.o.name,
           location: item.o.location
         })
-      }
 
-      if (item.kind === Kind.Dir) current = (item.o as Directory).children
+        kind = item.kind
+
+        if (item.kind === Kind.Dir) current = (item.o as Directory).children
+
+        break
+      }
     }
   }
 
   const found = pathLocation.length === path.length
   const result = found ? pathLocation : []
 
-  return [found, result]
+  return [found, result, kind] as SafePathReturn
 }

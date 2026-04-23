@@ -141,6 +141,49 @@ export function useFileSystem(): UseFileSystem {
     return SystemOutput.success()
   }
 
+  function rename(location: FSLocation, name: string): SystemOutput {
+    let slow: FileSystem | null = null
+    let fast = [fileSystem]
+
+    for (const chunk of location.slice(0, location.length - 1)) {
+      for (const item of fast) {
+        if (item.o.name === chunk && item.kind === Kind.Dir) {
+          fast = (item.o as Directory).children
+          slow = item
+          break
+        }
+      }
+    }
+
+    const filename = location.at(-1)
+
+    if (filename === name) return SystemOutput.success();
+
+    if (!slow) return SystemOutput.error('parent path not found')
+
+    let renameItem: FileSystem<Kind> | null = null
+
+    for (const file of (slow.o as Directory).children) {
+      if (file.o.name === name) {
+        if (file.kind === Kind.Dir) {
+          return SystemOutput.error(`you cannot rename '${filename}' to '${name}' because you already have a folder with this name`)
+        }
+
+        return SystemOutput.error(`you cannot rename '${filename}' to '${name}' because you already have a file with this name`)
+      } else if (file.o.name === filename) {
+        renameItem = file
+      }
+    }
+
+    if (renameItem) {
+      renameItem.o.rename(name)
+
+      setFileSystem({ ...fileSystem })
+    }
+
+    return SystemOutput.success();
+  }
+
   function mkdir(name: string): SystemOutput {
     const folderName = validFolderName(name)
 
@@ -227,6 +270,14 @@ export function useFileSystem(): UseFileSystem {
     return SystemOutput.success()
   }
 
+  function file(location: FSLocation): SystemOutput<Kind | null> {
+    const [fileExists, _, kind] = safePath(location, fileSystem)
+
+    if (!fileExists) return (SystemOutput<Kind>).error('this file or directory does not exists')
+
+    return SystemOutput.data(kind)
+  }
+
   function close() {
     setOpenedFileLocation(null)
 
@@ -237,6 +288,7 @@ export function useFileSystem(): UseFileSystem {
     setOpenedFileLocation(null)
 
     const result = path.cd(location)
+    console.log(location, result)
 
     if (!result) return SystemOutput.error('directory not found')
 
@@ -278,6 +330,7 @@ export function useFileSystem(): UseFileSystem {
         const fileContent = file.o as File
 
         fileContent.content = content
+        fileContent.updatedAt = new Date()
 
         setFileSystem({ ...fileSystem })
 
@@ -300,7 +353,9 @@ export function useFileSystem(): UseFileSystem {
     read,
     echo,
     openedFile: openedFileLocation,
+    rename,
     close,
+    file,
     ls,
     rmdir,
     rmfile,
@@ -316,8 +371,10 @@ export type UseFileSystem = {
   cd(location: FSLocation): SystemOutput
   read(location: FSLocation): SystemOutput<string | null>
   ls(): Array<ItemInfo>
+  file(location: FSLocation): SystemOutput<Kind | null>
   openedFile: null | FSLocation
   rmdir(location: FSLocation, force?: boolean): SystemOutput
+  rename(location: FSLocation, name: string): SystemOutput
   rmfile(location: FSLocation): SystemOutput
   open(location: FSLocation): SystemOutput
   close(): SystemOutput

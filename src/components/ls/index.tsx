@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { useRef } from 'react'
 import { AskDeleteFolderDialog } from '~/dialogs/ask-delete-folder-dialog'
 import { AskDeleteFileDialog } from '~/dialogs/ask-delete-file-dialog'
+import { EditEntryNameDialog } from '~/dialogs/edit-entry-name-dialog'
 
 type Props = {
   fs: UseFileSystem
@@ -16,6 +17,7 @@ export function Ls({ fs }: Props) {
 
   const askDeleteFolderDialog = useRef<AskDeleteFolderDialog>(null)
   const askDeleteFileDialog = useRef<AskDeleteFileDialog>(null)
+  const editFileEntryNameDialog = useRef<EditEntryNameDialog>(null)
 
   function openAskDeleteFolderDialog(location: Array<string>) {
     if (askDeleteFolderDialog.current) {
@@ -26,6 +28,12 @@ export function Ls({ fs }: Props) {
   function openAskDeleteFileDialog(location: Array<string>) {
     if (askDeleteFileDialog.current) {
       askDeleteFileDialog.current.open(location)
+    }
+  }
+
+  function openEditEntryNameDialog(location: Array<string>) {
+    if (editFileEntryNameDialog.current) {
+      editFileEntryNameDialog.current.open(location)
     }
   }
 
@@ -63,6 +71,7 @@ export function Ls({ fs }: Props) {
     <>
       <AskDeleteFolderDialog ref={askDeleteFolderDialog} deleteFunction={requestDeleteFolder} />
       <AskDeleteFileDialog ref={askDeleteFileDialog} deleteFunction={requestDeleteFile} />
+      <EditEntryNameDialog ref={editFileEntryNameDialog} fs={fs} />
 
       <table className='block p-5 w-full h-textarea overflow-x-auto'>
         <thead>
@@ -87,6 +96,7 @@ export function Ls({ fs }: Props) {
                   key={item.name}
                   info={item as ItemInfo<Kind.Dir>}
                   onClick={fs.cd}
+                  onRequestEdit={openEditEntryNameDialog}
                   onRequestDelete={location => requestDeleteFolder(location)}
                 />
               )
@@ -98,6 +108,7 @@ export function Ls({ fs }: Props) {
                   key={item.name}
                   info={item as ItemInfo<Kind.File>}
                   onClick={openFile}
+                  onRequestEditName={openEditEntryNameDialog}
                   onRequestDelete={openAskDeleteFileDialog}
                 />
               )

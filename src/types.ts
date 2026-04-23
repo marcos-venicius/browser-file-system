@@ -81,10 +81,11 @@ type AdditionalOptions = {
 }
 
 abstract class Item<T extends Kind> {
-  public readonly name: string
-  public readonly updatedAt: Date
+  public name: string
+  public updatedAt: Date
+  public location: FSLocation
+
   public readonly createdAt: Date
-  public readonly location: FSLocation
   private readonly kind: T
 
   constructor(name: string, kind: T, location: FSLocation, additionalOptions?: AdditionalOptions) {
@@ -111,6 +112,10 @@ abstract class Item<T extends Kind> {
       updatedAt: this.updatedAt,
       kind: this.kind
     }
+  }
+
+  public touch() {
+    this.updatedAt = new Date();
   }
 }
 
@@ -139,6 +144,12 @@ export class File extends Item<Kind.File> {
       kind: Kind.File
     }
   }
+
+  public rename(name: string) {
+    this.name = name
+    this.location[this.location.length - 1] = this.name
+    this.touch()
+  }
 }
 
 export class Directory extends Item<Kind.Dir> {
@@ -157,6 +168,13 @@ export class Directory extends Item<Kind.Dir> {
 
   public removeChildren(kind: Kind, name: string) {
     this.children = this.children.filter(x => x.kind !== kind || x.o.name !== name)
+    this.touch()
+  }
+
+  public rename(name: string) {
+    this.name = name
+    this.location[this.location.length - 1] = this.name
+    this.touch()
   }
 
   public static create(
